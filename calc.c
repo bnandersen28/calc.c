@@ -7,6 +7,7 @@ is 0 and the menu should be displayed until a valid option is inputed.*/
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <calc.h>
 char print_menu(); //Is this global variable okay? 
 
 
