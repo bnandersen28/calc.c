@@ -55,10 +55,9 @@ void convert_to_binary (short val, bin_str bin) // convert val to binary str for
           
         
         }
-        
 
             // shift the value right and pad with zeros
-        bin[19]= '\0'; //terminate with null character
+        bin[20]= '\0'; //terminate with null character
         
         int left = 0;
         int right = i- 1;
@@ -97,7 +96,7 @@ short get_operand (char mode) // read in numeric value in mode; return value
             break;
         case 'B':
             printf("Enter binary value: ");
-            scanf("%s",&bin);
+            scanf("%s",bin);
             printf("%s\n\n",bin);
             input_val = get_binary_op(bin);
             break;
@@ -285,23 +284,7 @@ int main (void) // main menu loop; execute option or call
                 subtract(&input_val, mode); // added &
                 break; 
             case '~':
-                convert_to_binary(input_val,bin);
-                printf("Before complement: %s\n",bin);
-                int len = strlen(bin);
-                while (i< len){
-                    if (bin[i]=='0'){
-                        bin[i]='1';
-                    }
-                    else if (bin[i]=='1'){
-                        bin[i]='0';
-                    }
-                    else if (bin[i]==' '){
-                        //ignore spaces
-                    }
-                    i++;
-                    printf("complement: %s\n",bin);
-                }
-                input_val = get_binary_op(bin);
+                input_val = ~input_val;
                 break;
             case 'N':
                 input_val = -input_val;
