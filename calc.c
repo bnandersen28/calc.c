@@ -6,15 +6,78 @@ is 0 and the menu should be displayed until a valid option is inputed.*/
 
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <calc.h>
-char print_menu(); //Is this global variable okay? 
+#include <ctype.h> 
+#include "calc.h"
+#include <math.h>
+char print_menu(); //Is this global variable okay?
+
+
+unsigned short get_binary_op (bin_str bin) // convert bin str to short; return value
+{
+
+    unsigned short result =0;
+    int bin_len = strlen(bin);
+    int i = 0;
+
+    while (i < bin_len){
+
+        if (bin[i]=='1'){
+            result += (1 << bin_len - i -1);
+        }
+
+        i++;
+        printf("Current val: %i\n",result);
+    }
+
+    return result;
+}
+
+void convert_to_binary (short val, bin_str bin) // convert val to binary str for output
+{
+    int i = 0;
+    int bit_count = 0;
+
+    
+    if (val == 0){
+          strcpy(bin,"0000 0000 0000 0000");
+    } 
+    else{
+
+    while (i<19)    
+        {
+            if (bit_count % 4==0 && bit_count!= 0){ //add spaces
+                bin[i++]=' ';
+            }
+            bin[i++]=(val %2 ==0) ? '0': '1';
+            val /= 2; 
+            bit_count++;
+            printf("Bin: %s\n",bin);
+          
+        
+        }
+        
+
+            // shift the value right and pad with zeros
+        bin[19]= '\0'; //terminate with null character
+        
+        int left = 0;
+        int right = i- 1;
+        while (left < right){
+            char temp = bin[left];
+            bin[left]= bin[right];
+            bin[right] = temp;
+            left ++;
+            right --;
+
+}}}
+ 
+
 
 
 short get_operand (char mode) // read in numeric value in mode; return value
 {
     short input_val;  //How can I ensure first input is used for adding and subtracting
-    char bin_str;       //If input_val is only defined in here
+    bin_str bin;       //If input_val is only defined in here
     switch(mode)
     {
         case 'O': 
@@ -34,26 +97,33 @@ short get_operand (char mode) // read in numeric value in mode; return value
             break;
         case 'B':
             printf("Enter binary value: ");
-            scanf("%s",&bin_str);
-            printf("%s\n\n",bin_str);
-            return bin_str; //Do I need to include to avoid crashes with last line in function?
+            scanf("%s",&bin);
+            printf("%s\n\n",bin);
+            input_val = get_binary_op(bin);
+            break;
         default:
             break; 
     }
+
    
     return input_val;
+    //return bin; //to get bin to print? 
    
 
 }
 
-//unsigned short get_binary_op (bin_str bin) // convert bin str to short; return value
-//void convert_to_binary (short val, bin_str bin) // convert val to binary str for output
-// If function is void how is there output?
+
+
 
 void print_bases (short input_val, char mode) // print out base values and str for mode
 {
     char modestring[4]= "   ";
+    bin_str bin;
     
+    convert_to_binary(input_val, bin); 
+   
+    
+
     //Set mode string based on mode
     switch(mode)
     {
@@ -68,20 +138,22 @@ void print_bases (short input_val, char mode) // print out base values and str f
             break;
         case 'B':
             strcpy(modestring, "Bin");
+            break;
         default:
             break;
     }
     
-///How to make sure values are updated based on operations? 
+   
 
     printf("****************************************\n");
-    printf("*  Base Values:        Input Mode: %s *\n",modestring); 
-    ///printf("*    Binary  :  %16") get variable from convert to binary function
+    printf("*  Base Values:        Input Mode: %-4s*\n",modestring); 
+    printf("*    Binary  :  %s    *\n", bin);  //printing valid input, fix star, and a@ instead of 0
     printf("*    Hex     :  %04hX                   *\n",input_val);
     printf("*    Octal   :  %06ho                 *\n",input_val);
     printf("*    Decimal :  %-6hd                 *\n",input_val);
     printf("****************************************\n");
     printf("\n"); 
+
 
 }
 
@@ -99,7 +171,7 @@ char print_menu (void) // print menu; get option until valid; return option
 while (!valid){
     printf("Please select one of the following options:\n"); //Keep showing until valid input
     printf("\n");
-    printf("B Binary Mode            & AND with Value             + Add to Value\n");
+    printf("B  Binary Mode           & AND with Value             + Add to Value\n");
     printf("O  Octal Mode            | OR with Value              - Subtract from value\n");
     printf("H  Hexadecimal Mode      ^ XOR with Value             N Negate value\n");
     printf("D  Decimal Mode          ~ Complement Value\n");
@@ -129,6 +201,29 @@ while (!valid){
 
                 }
 
+
+void add (short *val, char mode) // call get_operand to get value in mode
+ // to add to val; detect pos/neg overflow
+{
+    short operate_with; //What type?
+    operate_with = get_operand(mode); 
+    *val = *val + operate_with; //Added * to val=
+    if (*val > 0 && operate_with > 0 && val < 0){
+        printf("Positive overflow");
+    }
+    if (*val < 0 && operate_with < 0 && val > 0){
+        printf("Negative overflow");
+    }
+
+} 
+
+void subtract (short *val, char mode) // similar to add, but subtract
+{
+    short operate_with;
+    operate_with = get_operand(mode);
+    *val = *val - operate_with; //added * to val
+}
+
 int main (void) // main menu loop; execute option or call
 // appropriate function
 {  
@@ -136,6 +231,9 @@ int main (void) // main menu loop; execute option or call
     short input_val = 0; 
     char mode = 'D';
     short operator; 
+    short shift_value;
+    int i= 0; 
+    bin_str bin;
 
     while (!quit)
     {   print_bases(input_val,mode);
@@ -171,18 +269,56 @@ int main (void) // main menu loop; execute option or call
                 break; // edit after binary functions determined
             case '<':
                 printf("Enter number of positions to left shift value: \n\n");
-                mode = '<'; //Ensure calculations made based on mode
+                scanf("%hd",&shift_value);
+                input_val = input_val << shift_value; 
                 break; 
             case '>':
                 printf("Enter number of positions to right shift value: \n\n");
-                mode = '>'; //Ensure calculations based on mode
+                scanf("%hd",&shift_value);
+                input_val = input_val >> shift_value;
                 break;
             case '+':
-                  //Uses add function
-                break; 
-            case '-':
-                //Uses subtract function
+                add(&input_val, mode); // added &
+                print_bases(input_val, mode);  
                 break;  
+            case '-':
+                subtract(&input_val, mode); // added &
+                break; 
+            case '~':
+                convert_to_binary(input_val,bin);
+                printf("Before complement: %s\n",bin);
+                int len = strlen(bin);
+                while (i< len){
+                    if (bin[i]=='0'){
+                        bin[i]='1';
+                    }
+                    else if (bin[i]=='1'){
+                        bin[i]='0';
+                    }
+                    else if (bin[i]==' '){
+                        //ignore spaces
+                    }
+                    i++;
+                    printf("complement: %s\n",bin);
+                }
+                input_val = get_binary_op(bin);
+                break;
+            case 'N':
+                input_val = -input_val;
+                break;
+            case '|':
+                operator = get_operand(mode);
+                input_val = input_val || operator;
+                break;
+            case '&':
+                operator = get_operand(mode);
+                input_val = input_val && operator; 
+                break;     
+            case '^':
+                operator = get_operand(mode);
+                input_val = input_val ^ operator;
+                break;
+
             default:
                 break;  
         
@@ -193,9 +329,5 @@ int main (void) // main menu loop; execute option or call
     
     
 
-void add (short *val, char mode) // call get_operand to get value in mode
- // to add to val; detect pos/neg overflow
-{
-    
 
-} 
+
