@@ -18,6 +18,7 @@ unsigned short get_binary_op (bin_str bin) // convert bin str to short; return v
     unsigned short result =0;
     int bin_len = strlen(bin);
     int i = 0;
+    
 
     while (i < bin_len){
 
@@ -26,7 +27,6 @@ unsigned short get_binary_op (bin_str bin) // convert bin str to short; return v
         }
 
         i++;
-        printf("Current val: %i\n",result);
     }
 
     return result;
@@ -35,29 +35,28 @@ unsigned short get_binary_op (bin_str bin) // convert bin str to short; return v
 void convert_to_binary (short val, bin_str bin) // convert val to binary str for output
 {
     int i = 0;
-    int bit_count = 0;
-
-    
-    if (val == 0){
-          strcpy(bin,"0000 0000 0000 0000");
+    int bit_count;
+    unsigned int uval = val;
+        
+    if (uval == 0){
+          strcpy(bin,"0000 0000 0000 0000 ");
     } 
     else{
 
-    while (i<19)    
-        {
-            if (bit_count % 4==0 && bit_count!= 0){ //add spaces
+    while (i<20)    
+        {   
+            
+            if (bit_count % 4 ==0 && bit_count!=0){ //add spaces
                 bin[i++]=' ';
             }
-            bin[i++]=(val %2 ==0) ? '0': '1';
-            val /= 2; 
+            bin[i++]=(uval %2 ==0) ? '0': '1';
             bit_count++;
-            printf("Bin: %s\n",bin);
-          
+            uval /= 2; 
+            
         
         }
 
-            // shift the value right and pad with zeros
-        bin[20]= '\0'; //terminate with null character
+        bin[20]= '\0'; 
         
         int left = 0;
         int right = i- 1;
@@ -67,8 +66,15 @@ void convert_to_binary (short val, bin_str bin) // convert val to binary str for
             bin[right] = temp;
             left ++;
             right --;
+            printf("Bin: %s\n",bin);
+        
+        
+        
+    }
 
-}}}
+}}
+
+
  
 
 
@@ -96,7 +102,7 @@ short get_operand (char mode) // read in numeric value in mode; return value
             break;
         case 'B':
             printf("Enter binary value: ");
-            scanf("%s",bin);
+            scanf("%s",&bin);
             printf("%s\n\n",bin);
             input_val = get_binary_op(bin);
             break;
@@ -119,7 +125,8 @@ void print_bases (short input_val, char mode) // print out base values and str f
     char modestring[4]= "   ";
     bin_str bin;
     
-    convert_to_binary(input_val, bin); 
+    convert_to_binary(input_val, bin);
+    
    
     
 
@@ -142,11 +149,11 @@ void print_bases (short input_val, char mode) // print out base values and str f
             break;
     }
     
-   
+     
 
     printf("****************************************\n");
-    printf("*  Base Values:        Input Mode: %-4s*\n",modestring); 
-    printf("*    Binary  :  %s    *\n", bin);  //printing valid input, fix star, and a@ instead of 0
+    printf("*  Base Values:        Input Mode: %-4s*\n",modestring); strcpy(modestring, "  "); //keeps adding modestring to end
+    printf("*    Binary  :  %s *\n", bin);  //printing valid input, fix star, and a@ instead of 0
     printf("*    Hex     :  %04hX                   *\n",input_val);
     printf("*    Octal   :  %06ho                 *\n",input_val);
     printf("*    Decimal :  %-6hd                 *\n",input_val);
@@ -284,10 +291,10 @@ int main (void) // main menu loop; execute option or call
                 subtract(&input_val, mode); // added &
                 break; 
             case '~':
-                input_val = ~input_val;
+                input_val =~ input_val;
                 break;
             case 'N':
-                input_val = -input_val;
+                input_val =- input_val;
                 break;
             case '|':
                 operator = get_operand(mode);
@@ -295,11 +302,11 @@ int main (void) // main menu loop; execute option or call
                 break;
             case '&':
                 operator = get_operand(mode);
-                input_val = input_val && operator; 
+                input_val= input_val && operator; 
                 break;     
             case '^':
                 operator = get_operand(mode);
-                input_val = input_val ^ operator;
+                input_val =input_val^ operator;
                 break;
 
             default:
